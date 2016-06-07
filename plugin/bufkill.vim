@@ -652,11 +652,13 @@ endfunction
 function! <SID>UndoKill() "{{{1
   let DebugF = 'UndoKill'
   call s:Debug(1, DebugF)
+  let setBufListed = 0
 
   if !exists('s:BufKillLastBufferKilledNum') || !exists('s:BufKillLastBufferKilledPath') || s:BufKillLastBufferKilledNum == -1 || s:BufKillLastBufferKilledPath == ''
     echoe 'BufKill: nothing to undo (only one level of undo is supported)'
   else
     if bufexists(s:BufKillLastBufferKilledNum)
+      let setBufListed = 1
       let cmd = 'b' . s:BufKillLastBufferKilledNum
     elseif filereadable(s:BufKillLastBufferKilledPath)
       let cmd = 'e ' . s:BufKillLastBufferKilledPath
@@ -677,6 +679,9 @@ function! <SID>UndoKill() "{{{1
       exec 'normal! ' . win . 'w'
       call s:Debug(2, DebugF, 'Current window ' . winnr())
       exec cmd
+      if setBufListed
+        exec "set buflisted"
+      endif
       let i = i + 1
     endwhile
     call <SID>RestoreWindowPos()
